@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNA CARD HUB</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --card-bg: #2d2d2d;
+            --primary: #cc0000; /* Vermelho CNA Sólido */
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --border-color: #444444;
+            --grid-gap: 20px;
+        }
+
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+
+        h1 { 
+            margin: 0; 
+            font-size: 2rem; 
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            margin-top: 40px;
+        }
+
+        /* --- Missão Diária --- */
+        .mission-box {
+            background: var(--card-bg);
+            border-left: 6px solid var(--primary);
+            border-radius: 6px;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .mission-info h3 { margin: 0 0 5px 0; color: var(--text-main); font-size: 1.2rem; }
+        .mission-info p { margin: 0; color: var(--text-muted); }
+        
+        .reward-badge {
+            background: #444;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* --- Área de Código --- */
+        .code-area {
+            display: flex;
+            gap: 0;
+            margin-bottom: 50px;
+            justify-content: center;
+        }
+
+        input[type="text"] {
+            padding: 15px;
+            background: #fff;
+            color: #333;
+            border: none;
+            border-radius: 6px 0 0 6px;
+            width: 300px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            outline: none;
+        }
+
+        button {
+            padding: 15px 30px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: #990000; }
+
+        h2 { 
+            border-bottom: 2px solid var(--border-color); 
+            padding-bottom: 10px; 
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        /* --- Grid de Cards (Responsividade) --- */
+        .collection-grid {
+            display: grid;
+            gap: var(--grid-gap);
+            padding-bottom: 50px;
+            /* Padrão para telas grandes (Desktop): 4 colunas */
+            grid-template-columns: repeat(4, 1fr); 
+        }
+
+        /* Media Query para Telas Médias (Tablets, 768px a 1024px) */
+        @media (max-width: 1024px) {
+            .collection-grid {
+                /* 3 Colunas */
+                grid-template-columns: repeat(3, 1fr); 
+            }
+        }
+
+        /* Media Query para Telas Pequenas (Celulares, até 600px) */
+        @media (max-width: 600px) {
+            .collection-grid {
+                /* 2 Colunas */
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .code-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            .code-area input[type="text"], .code-area button {
+                width: 100%;
+                box-sizing: border-box;
+                border-radius: 6px;
+            }
+            .mission-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+        /* Fim das Media Queries */
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            position: relative;
+            aspect-ratio: 2/3;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            overflow: hidden; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Área da Imagem */
+        .card-image-wrapper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .card-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: filter 0.3s, transform 0.3s;
+            /* AJUSTE PARA REMOVER BORDA BRANCA */
+            transform: scale(1.02); 
+            /* -------------------------------------- */
+        }
+
+        /* ESTADO: DESBLOQUEADO (Padrão) */
+        .card.unlocked {
+            cursor: pointer;
+        }
+        .card.unlocked:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        .card.unlocked .card-image-wrapper img {
+            filter: none; /* Imagem normal */
+        }
+
+        /* ESTADO: BLOQUEADO (Desfocado) */
+        .card.locked {
+            cursor: not-allowed;
+        }
+        .card.locked .card-image-wrapper img {
+            filter: blur(4px) grayscale(100%); /* Desfoque e Preto/Branco */
+        }
+        
+        /* ANIMAÇÃO DE DESBLOQUEIO */
+        @keyframes unlocked-glow {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(204, 0, 0, 0); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px var(--primary); }
+            100% { transform: scale(1); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        }
+
+        /* Classe temporária aplicada via JS */
+        .card.animate-unlock {
+            animation: unlocked-glow 0.8s ease-out;
+        }
+        /* Fim da Animação */
+
+        /* Indicador de raridade (borda) - Mantido para distinção visual da borda */
+        .card.unlocked.rare-comum { border-bottom: 4px solid #999; }
+        .card.unlocked.rare-raro { border-bottom: 4px solid #cc0000; }
+        .card.unlocked.rare-lendario { border-bottom: 4px solid #ffcc00; }
+
+        /* Notificação */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CNA CARD HUB</h1>
+    </header>
+
+    <div class="container">
+        <section class="mission-box">
+            <div class="mission-info">
+                <h3>Missão do Dia</h3>
+                <p id="daily-text">Carregando...</p>
+            </div>
+            <div class="reward-badge">+50 XP</div>
+        </section>
+
+        <section class="code-area">
+            <input type="text" id="code-input" placeholder="DIGITE O CÓDIGO">
+            <button onclick="redeemCode()">RESGATAR</button>
+        </section>
+
+        <h2>Sua Coleção (32 Cartas)</h2>
+        
+        <div class="collection-grid" id="card-grid">
+            </div>
+    </div>
+
+    <div id="notification"></div>
+
+    <script>
+        // --- 1. Banco de Dados (32 Cards - Linhas Individuais) ---
+        const cardsDB = [
+            // CARTAS 01 - 06 (Iniciais)
+            { id: 1, name: "Student Entry", image: "card_01.png", rarity: "comum", code: "CNA1" },
+            { id: 2, name: "Teacher Helper", image: "card_02.png", rarity: "comum", code: "CNA2" },
+            { id: 3, name: "Grammar Whiz", image: "card_03.png", rarity: "raro", code: "CNA3" },
+            { id: 4, name: "Speaking Star", image: "card_04.png", rarity: "raro", code: "CNA4" },
+            { id: 5, name: "CNA Global", image: "card_05.png", rarity: "lendario", code: "CNA5" },
+            { id: 6, name: "Homework Ace", image: "card_06.png", rarity: "lendario", code: "CNA6" },
+
+            // CARTAS 07 - 32 (Finais com códigos sequenciais editáveis)
+            { id: 7, name: "Vocabulary Master", image: "card_07.png", rarity: "comum", code: "CNA07" },
+            { id: 8, name: "Pronunciation Pro", image: "card_08.png", rarity: "comum", code: "CNA08" },
+            { id: 9, name: "Listening Legend", image: "card_09.png", rarity: "comum", code: "CNA09" },
+            { id: 10, name: "Culture Explorer", image: "card_10.png", rarity: "raro", code: "CNA10" },
+            { id: 11, name: "Digital Learner", image: "card_11.png", rarity: "comum", code: "CNA11" },
+            { id: 12, name: "Flashcard Fan", image: "card_12.png", rarity: "comum", code: "CNA12" },
+            { id: 13, name: "Reading Runner", image: "card_13.png", rarity: "raro", code: "CNA13" },
+            { id: 14, name: "Creative Writer", image: "card_14.png", rarity: "comum", code: "CNA14" },
+            { id: 15, name: "Attendance Champ", image: "card_15.png", rarity: "lendario", code: "CNA15" },
+            { id: 16, name: "Test Taker", image: "card_16.png", rarity: "comum", code: "CNA16" },
+            { id: 17, name: "Project Master", image: "card_17.png", rarity: "raro", code: "CNA17" },
+            { id: 18, name: "Presentation Pro", image: "card_18.png", rarity: "comum", code: "CNA18" },
+            { id: 19, name: "Group Work Hero", image: "card_19.png", rarity: "comum", code: "CNA19" },
+            { id: 20, name: "CNA Ambassador", image: "card_20.png", rarity: "lendario", code: "CNA20" },
+            { id: 21, name: "Quick Thinker", image: "card_21.png", rarity: "raro", code: "CNA21" },
+            { id: 22, name: "Morning Star", image: "card_22.png", rarity: "comum", code: "CNA22" },
+            { id: 23, name: "Night Owl", image: "card_23.png", rarity: "comum", code: "CNA23" },
+            { id: 24, name: "Fast Pacer", image: "card_24.png", rarity: "comum", code: "CNA24" },
+            { id: 25, name: "Motivation Max", image: "card_25.png", rarity: "raro", code: "CNA25" },
+            { id: 26, name: "Reviewer King", image: "card_26.png", rarity: "comum", code: "CNA26" },
+            { id: 27, name: "Socializer", image: "card_27.png", rarity: "raro", code: "CNA27" },
+            { id: 28, name: "Tech Wizard", image: "card_28.png", rarity: "comum", code: "CNA28" },
+            { id: 29, name: "Bookworm", image: "card_29.png", rarity: "comum", code: "CNA29" },
+            { id: 30, name: "Perfect Score", image: "card_30.png", rarity: "lendario", code: "CNA30" },
+            { id: 31, name: "Future Star", image: "card_31.png", rarity: "comum", code: "CNA31" },
+            { id: 32, name: "Graduation Goal", image: "card_32.png", rarity: "raro", code: "CNA32" }
+        ];
+
+
+        const missionsDB = [
+            "Complete 3 lições no Web Lessons.",
+            "Assista a 1 vídeo em inglês sem legendas.",
+            "Aprenda 5 palavras novas hoje.",
+            "Faça check-in na sua unidade CNA.",
+            "Pratique conversação por 10 minutos."
+        ];
+
+        // --- 2. Estado ---
+        let userCollection = JSON.parse(localStorage.getItem('cnaCollection')) || [];
+        const gridElement = document.getElementById('card-grid');
+        const notification = document.getElementById('notification');
+
+        // --- 3. Renderização: Exibe todas as 32 cartas com o estado (Bloqueado/Desbloqueado) ---
+        function renderCollection() {
+            gridElement.innerHTML = '';
+
+            cardsDB.forEach(card => {
+                const isUnlocked = userCollection.includes(card.id);
+                
+                const cardEl = document.createElement('div');
+                cardEl.id = `card-${card.id}`; 
+                cardEl.className = `card ${isUnlocked ? 'unlocked' : 'locked'} rare-${card.rarity}`;
+                
+                // Estrutura do Card com APENAS Imagem
+                cardEl.innerHTML = `
+                    <div class="card-image-wrapper">
+                        <img src="cards/${card.image}" alt="Card ${isUnlocked ? card.name : 'Bloqueado'}">
+                    </div>
+                    <div style="position:absolute; width:100%; height:100%; top:0; z-index:5;"></div>
+                `;
+                gridElement.appendChild(cardEl);
+            });
+        }
+
+        // --- 4. Missão ---
+        function setDailyMission() {
+            const txt = missionsDB[Math.floor(Math.random() * missionsDB.length)];
+            document.getElementById('daily-text').innerText = txt;
+        }
+
+        // --- 5. Resgate ---
+        function redeemCode() {
+            const input = document.getElementById('code-input');
+            const code = input.value.trim().toUpperCase();
+            // Procura o card usando o código
+            const foundCard = cardsDB.find(c => c.code === code);
+
+            if (foundCard) {
+                if (userCollection.includes(foundCard.id)) {
+                    showNotification("Você já possui este card.", "#e67e22");
+                } else {
+                    userCollection.push(foundCard.id);
+                    saveData();
+                    
+                    renderCollection();
+                    
+                    const unlockedCardEl = document.getElementById(`card-${foundCard.id}`);
+                    if (unlockedCardEl) {
+                        unlockedCardEl.classList.remove('animate-unlock');
+                        void unlockedCardEl.offsetWidth; 
+                        unlockedCardEl.classList.add('animate-unlock');
+                    }
+
+                    // A notificação usa o nome da carta para feedback
+                    showNotification(`Card ${foundCard.name} liberado!`, "#27ae60");
+                }
+            } else {
+                showNotification("Código inválido.", "#c0392b");
+            }
+            input.value = '';
+        }
+
+        function saveData() {
+            localStorage.setItem('cnaCollection', JSON.stringify(userCollection));
+        }
+
+        function showNotification(text, color) {
+            notification.textContent = text;
+            notification.style.backgroundColor = color;
+            notification.style.display = 'block';
+            setTimeout(() => { notification.style.display = 'none'; }, 3000);
+        }
+
+        // Init
+        setDailyMission();
+        renderCollection();
+
+    </script>
+</body>
+</html>
